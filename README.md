@@ -70,4 +70,4 @@ thelook-ecommerce-sql-analysis/
 
 ---
 
-**Author:** [Nama Anda] | [LinkedIn / GitHub link]
+**Author:** [Tsania Nur'aini F] | [LinkedIn / GitHub link]
