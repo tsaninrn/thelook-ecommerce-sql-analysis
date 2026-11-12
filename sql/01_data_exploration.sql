@@ -111,3 +111,60 @@ SELECT
   COUNT(DISTINCT id)  AS distinct_ids,
   COUNTIF(id IS NULL) AS null_ids
 FROM `bigquery-public-data.thelook_ecommerce.order_items`;
+
+-- ---------------------------------------------------------------------
+-- Query 6: Rentang tanggal data
+-- Tujuan   : Mengetahui periode data agar analisis tren (bulanan/tahunan)
+--            memiliki dasar yang jelas.
+-- Hasil (12 Nov 2026): order pertama = 2019-01-12
+--                      order terakhir = 2026-11-12
+--                      rentang = 2.861 hari
+-- Interpretasi: Data mencakup sekitar 7,8 tahun. Bulan pertama (Jan 2019)
+--               dan bulan terakhir (Nov 2026) tidak penuh, sehingga harus
+--               dikecualikan atau diberi tanda pada analisis tren bulanan.
+-- ---------------------------------------------------------------------
+SELECT
+  MIN(created_at) AS first_order_date,
+  MAX(created_at) AS last_order_date,
+  DATE_DIFF(DATE(MAX(created_at)), DATE(MIN(created_at)), DAY) AS span_days
+FROM `bigquery-public-data.thelook_ecommerce.orders`;
+
+
+-- ---------------------------------------------------------------------
+-- Query 7: Jumlah produk per kategori
+-- Tujuan   : Memahami struktur katalog produk.
+-- Hasil (12 Nov 2026): 26 kategori. Terbanyak: Intimates (2.363),
+--                      Jeans (1.999), Tops & Tees (1.868).
+--                      Tersedikit: Clothing Sets (37), Suits (188).
+-- Interpretasi: Ini jumlah produk, bukan penjualan. Ada kategori yang
+--               mirip: Socks vs Socks & Hosiery, Pants vs Pants & Capris,
+--               Suits vs Suits & Sport Coats. Belum digabung dan dicatat
+--               sebagai keterbatasan di data quality report.
+-- ---------------------------------------------------------------------
+SELECT
+  category,
+  COUNT(*) AS product_count
+FROM `bigquery-public-data.thelook_ecommerce.products`
+GROUP BY category
+ORDER BY product_count DESC;
+
+
+-- ---------------------------------------------------------------------
+-- Query 8: Sebaran pelanggan per negara dan gender
+-- Tujuan   : Mengetahui profil geografis dan gender pelanggan.
+-- Hasil (12 Nov 2026): China 33.926 user, United States 22.552,
+--                      Brasil 14.634 (ketiganya sekitar 71% dari 100.000).
+--                      Gender hanya F dan M, rasio hampir seimbang.
+-- Interpretasi: Pelanggan terkonsentrasi di tiga negara. Ditemukan nama
+--               negara tidak konsisten: 'España' (4 user) dan
+--               'Deutschland' (2 user) seharusnya Spain dan Germany.
+--               Colombia (9) dan Austria (1) terlalu kecil untuk
+--               dijadikan dasar kesimpulan.
+-- ---------------------------------------------------------------------
+SELECT
+  country,
+  gender,
+  COUNT(*) AS user_count
+FROM `bigquery-public-data.thelook_ecommerce.users`
+GROUP BY country, gender
+ORDER BY user_count DESC;
